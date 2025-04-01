@@ -126,7 +126,10 @@ export default function ResultsPage() {
             .eq("session_id", session_id);
 
           if (answersError) throw answersError;
-          setAnswers(answersRows || []);
+          
+          // Add type assertion to ensure the data matches our Answer type
+          const typedAnswers = (answersRows || []) as unknown as Answer[];
+          setAnswers(typedAnswers);
           setAnswersLoading(false);
         }
       } catch (err: unknown) {
