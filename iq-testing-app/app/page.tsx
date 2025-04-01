@@ -35,6 +35,8 @@ export default function Home() {
               width={300}
               height={200}
               style={{ borderRadius: "8px" }}
+              objectFit="cover"
+              priority
             />
             <Image
               src="/tesla.jpeg"
@@ -42,6 +44,8 @@ export default function Home() {
               width={300}
               height={200}
               style={{ borderRadius: "8px" }}
+              objectFit="cover"
+              priority
             />
           </div>
 
