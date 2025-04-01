@@ -239,6 +239,21 @@ export default function ResultsPage() {
     );
   }
 
+  if (!sessionData) {
+    return (
+      <main style={{
+          display: "flex",
+          height: "100vh",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#121212",
+          color: "#fff",
+        }}>
+        <p>No session data found.</p>
+      </main>
+    );
+  }
+
   if (!sessionData.advanced_report_redeemed) {
     return (
       <main style={{
