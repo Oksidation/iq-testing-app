@@ -11,9 +11,11 @@ import {
   Legend,
   ChartData,
   ChartOptions,
+  ChartType,
 } from "chart.js";
 import annotationPlugin from "chartjs-plugin-annotation";
 import { Line } from "react-chartjs-2";
+import { AnnotationOptions, AnnotationTypeRegistry } from 'chartjs-plugin-annotation';
 
 // Register Chart.js components & annotation plugin once at module level.
 ChartJS.register(
@@ -86,7 +88,7 @@ export default function BellCurveChart({ userIQ }: { userIQ: number }) {
         annotation: {
           annotations: {
             userIQLine: {
-              type: "line",
+              type: 'line' as const,
               xMin: userIQ,
               xMax: userIQ,
               borderColor: "red",
@@ -94,12 +96,12 @@ export default function BellCurveChart({ userIQ }: { userIQ: number }) {
               label: {
                 enabled: true,
                 content: `Your IQ: ${userIQ}`,
-                position: "end",
+                position: 'end' as const,
                 backgroundColor: "rgba(255,0,0,0.8)",
                 color: "#fff",
               },
-            },
-          },
+            } as AnnotationOptions<'line'>
+          }
         },
         legend: {
           display: false,
