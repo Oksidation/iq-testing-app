@@ -101,7 +101,9 @@ export default function AccountPage() {
 
         if (testError) throw testError;
 
-        setTestSessions((testData as TestSession[]) || []);
+        // Add type assertion to ensure the data matches our TestSession type
+        const typedTestData = (testData || []) as unknown as TestSession[];
+        setTestSessions(typedTestData);
       } catch (error) {
         console.error("Error fetching user data:", error);
         router.replace("/login");
