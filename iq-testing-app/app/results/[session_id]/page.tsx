@@ -30,10 +30,6 @@ type Answer = {
   };
 };
 
-type ApiError = {
-  message: string;
-};
-
 function formatSecondsToMMSS(totalSeconds: number) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;

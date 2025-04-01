@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseClient } from "@/lib/supabaseClient";
 import Link from "next/link";
-import { Session } from "@supabase/supabase-js";
 
 type TestSession = {
   id: string;

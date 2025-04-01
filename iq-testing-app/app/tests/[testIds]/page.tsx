@@ -31,10 +31,6 @@ type Question = {
   category?: string;
 };
 
-type ApiError = {
-  message: string;
-};
-
 export default function TestDetailPage() {
   console.log("[TestDetailPage] Component is mounting...");
   console.log("[TestDetailPage] Params:", useParams());

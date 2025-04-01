@@ -74,8 +74,9 @@ export default function RegisterPage() {
           setStep(2);
         }
       }
-    } catch (err: CustomError) {
-      setErrorMsg(err.message || "An error occurred during registration");
+    } catch (err) {
+      const error = err as CustomError;
+      setErrorMsg(error.message || "An error occurred during registration");
     } finally {
       setLoading(false);
     }
@@ -116,8 +117,9 @@ export default function RegisterPage() {
         // Redirect to login or home
         router.push("/login");
       }
-    } catch (err: CustomError) {
-      setErrorMsg(err.message || "An error occurred while updating profile details");
+    } catch (err) {
+      const error = err as CustomError;
+      setErrorMsg(error.message || "An error occurred while updating profile details");
     } finally {
       setLoading(false);
     }
