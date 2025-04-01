@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,7 +15,7 @@ import {
 import annotationPlugin from "chartjs-plugin-annotation";
 import { Line } from "react-chartjs-2";
 
-// Register Chart.js components & annotation plugin
+// Register Chart.js components & annotation plugin once at module level.
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -38,8 +38,7 @@ function normalPdf(x: number, mean: number, sd: number) {
 function generateBellCurveData(mean: number, sd: number) {
   const dataPoints = [];
   for (let x = 60; x <= 140; x++) {
-    const y = normalPdf(x, mean, sd);
-    dataPoints.push({ x, y }); // important: return objects { x, y }
+    dataPoints.push({ x, y: normalPdf(x, mean, sd) });
   }
   return dataPoints;
 }
@@ -48,12 +47,8 @@ type ChartDataType = ChartData<'line', { x: number; y: number }[]>;
 type ChartOptionsType = ChartOptions<'line'>;
 
 export default function BellCurveChart({ userIQ }: { userIQ: number }) {
-  const [chartData, setChartData] = useState<{
-    data: ChartDataType;
-    options: ChartOptionsType;
-  } | null>(null);
-
-  useEffect(() => {
+  // Memoize chart configuration so it only recalculates when userIQ changes.
+  const { data, options } = useMemo(() => {
     const mean = 100;
     const sd = 15;
     const points = generateBellCurveData(mean, sd);
@@ -112,18 +107,10 @@ export default function BellCurveChart({ userIQ }: { userIQ: number }) {
       },
     };
 
-    setChartData({ data, options });
+    return { data, options };
   }, [userIQ]);
 
-  if (!chartData) {
-    return <p>Loading chart...</p>;
-  }
-
   return (
-    <Line
-      data={chartData.data}
-      options={chartData.options}
-      style={{ maxHeight: 300, width: "100%" }}
-    />
+    <Line data={data} options={options} style={{ maxHeight: 300, width: "100%" }} />
   );
 }
