@@ -9,6 +9,8 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartData,
+  ChartOptions,
 } from "chart.js";
 import annotationPlugin from "chartjs-plugin-annotation";
 import { Line } from "react-chartjs-2";
@@ -42,16 +44,21 @@ function generateBellCurveData(mean: number, sd: number) {
   return dataPoints;
 }
 
+type ChartDataType = ChartData<'line', { x: number; y: number }[]>;
+type ChartOptionsType = ChartOptions<'line'>;
+
 export default function BellCurveChart({ userIQ }: { userIQ: number }) {
-  const [chartData, setChartData] = useState<any>(null);
+  const [chartData, setChartData] = useState<{
+    data: ChartDataType;
+    options: ChartOptionsType;
+  } | null>(null);
 
   useEffect(() => {
     const mean = 100;
     const sd = 15;
     const points = generateBellCurveData(mean, sd);
 
-    const data = {
-      // We pass the entire { x, y } array to the dataset:
+    const data: ChartDataType = {
       datasets: [
         {
           label: "IQ Normal Distribution",
@@ -60,16 +67,16 @@ export default function BellCurveChart({ userIQ }: { userIQ: number }) {
           borderWidth: 2,
           pointRadius: 0,
           tension: 0.4,
-          parsing: false, // Tell Chart.js we're providing explicit x/y
+          parsing: false,
         },
       ],
     };
 
-    const options: any = {
+    const options: ChartOptionsType = {
       responsive: true,
       scales: {
         x: {
-          type: "linear", // numeric axis
+          type: "linear",
           min: 60,
           max: 140,
           title: { display: true, text: "IQ Score" },

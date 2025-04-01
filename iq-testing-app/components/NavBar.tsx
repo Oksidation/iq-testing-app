@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Session } from "@supabase/supabase-js";
 
 export default function NavBar() {
   const router = useRouter();
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     supabaseClient.auth.getSession().then(({ data, error }) => {
@@ -36,29 +38,29 @@ export default function NavBar() {
 
   return (
     <nav style={styles.nav}>
-      <a href="/" style={styles.brand}>
+      <Link href="/" style={styles.brand}>
         IQ Tester
-      </a>
+      </Link>
       <div style={styles.menu}>
         {!session && (
           <>
-            <a href="/register" style={styles.link}>
+            <Link href="/register" style={styles.link}>
               Register
-            </a>
-            <a href="/login" style={styles.link}>
+            </Link>
+            <Link href="/login" style={styles.link}>
               Login
-            </a>
+            </Link>
           </>
         )}
 
         {session && (
           <>
-            <a href="/account" style={styles.link}>
+            <Link href="/account" style={styles.link}>
               Account
-            </a>
-            <a href="/tests" style={styles.link}>
+            </Link>
+            <Link href="/tests" style={styles.link}>
               Tests
-            </a>
+            </Link>
             <a href="#" onClick={handleLogout} style={styles.link}>
               Logout
             </a>

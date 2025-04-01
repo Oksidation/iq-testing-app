@@ -332,12 +332,10 @@ export default function TestDetailPage() {
       // 5) Finally, redirect to /account
       router.replace("/account");
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error submitting test:", err);
       setError(
-        typeof err?.message === "string"
-          ? err.message
-          : "An error occurred while submitting the test"
+        err instanceof Error ? err.message : "An error occurred while submitting the test"
       );
     } finally {
       setLoading(false);

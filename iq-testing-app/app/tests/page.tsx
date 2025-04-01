@@ -44,12 +44,10 @@ export default function TestsIndexPage() {
         if (testsError) throw testsError;
 
         setTests(testsData || []);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error:', err);
         setError(
-          typeof err?.message === 'string'
-            ? err.message
-            : 'An error occurred while fetching tests'
+          err instanceof Error ? err.message : 'An error occurred while fetching tests'
         );
       } finally {
         setLoading(false);
