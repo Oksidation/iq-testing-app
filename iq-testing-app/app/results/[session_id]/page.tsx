@@ -6,6 +6,34 @@ import { supabaseClient } from "@/lib/supabaseClient";
 import BellCurveChart from "@/components/BellCurveChart";
 import CircularProgressBar from "@/components/CircularProgressBar";
 
+// Add these types after the imports
+type SessionData = {
+  test_id: string;
+  score: number;
+  advanced_report_redeemed: boolean;
+  advanced_report_redeemed_at: string | null;
+  score_numerical?: number;
+  score_logical?: number;
+  score_spatial?: number;
+  started_at: string;
+};
+
+type Answer = {
+  id: string;
+  question_id: string;
+  selected_option: string;
+  created_at: string;
+  questions: {
+    question_text: string;
+    correct_option: string;
+    category: string;
+  };
+};
+
+type ApiError = {
+  message: string;
+};
+
 function formatSecondsToMMSS(totalSeconds: number) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
@@ -18,17 +46,14 @@ export default function ResultsPage() {
 
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-  const [sessionData, setSessionData] = useState<any | null>(null);
+  const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [userCredits, setUserCredits] = useState<number>(0);
   const [fetchingUser, setFetchingUser] = useState(true);
 
   const IQ_TEST_ID = "00000000-0000-0000-0000-000000000001";
 
-  const [answers, setAnswers] = useState<any[]>([]);
+  const [answers, setAnswers] = useState<Answer[]>([]);
   const [answersLoading, setAnswersLoading] = useState(true);
-
-  // Add userId to the component's state
-  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -51,7 +76,6 @@ export default function ResultsPage() {
         }
 
         const userId = session.user.id;
-        setUserId(userId);
 
         const { data: userData, error: userError } = await supabaseClient
           .from("users")
@@ -109,9 +133,9 @@ export default function ResultsPage() {
           setAnswers(answersRows || []);
           setAnswersLoading(false);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching data:", err);
-        setErrorMsg(err.message || "Unable to fetch session data.");
+        setErrorMsg(err instanceof Error ? err.message : "Unable to fetch session data.");
       } finally {
         setLoading(false);
       }
@@ -130,15 +154,10 @@ export default function ResultsPage() {
 
       setLoading(true);
 
-      const {
-        data: userUpdateData,
-        error: userUpdateError,
-      } = await supabaseClient
+      const { error: userUpdateError } = await supabaseClient
         .from("users")
         .update({ credits: userCredits - 1 })
-        .eq("id", (await supabaseClient.auth.getSession()).data.session?.user.id)
-        .select()
-        .single();
+        .eq("id", (await supabaseClient.auth.getSession()).data.session?.user.id);
 
       if (userUpdateError) {
         throw userUpdateError;
@@ -158,9 +177,9 @@ export default function ResultsPage() {
 
       router.push(`/results/${session_id}/loading`);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.message || "Failed to unlock advanced report.");
+      alert(err instanceof Error ? err.message : "Failed to unlock advanced report.");
     } finally {
       setLoading(false);
     }

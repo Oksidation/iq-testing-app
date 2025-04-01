@@ -11,6 +11,30 @@ type CategoryTotals = {
   spatial: { correct: number; total: number };
 };
 
+// Add these types after the imports
+type Question = {
+  id: string;
+  testid: string;
+  question_text: string;
+  question_img_url?: string;
+  option_a?: string;
+  option_b?: string;
+  option_c?: string;
+  option_d?: string;
+  option_e?: string;
+  option_a_img_url?: string;
+  option_b_img_url?: string;
+  option_c_img_url?: string;
+  option_d_img_url?: string;
+  option_e_img_url?: string;
+  correct_option: string;
+  category?: string;
+};
+
+type ApiError = {
+  message: string;
+};
+
 export default function TestDetailPage() {
   console.log("[TestDetailPage] Component is mounting...");
   console.log("[TestDetailPage] Params:", useParams());
@@ -20,7 +44,7 @@ export default function TestDetailPage() {
   const { testIds } = params;
 
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [testFailed, setTestFailed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -77,12 +101,10 @@ export default function TestDetailPage() {
         if (qsError) throw qsError;
 
         setQuestions(qs || []);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error initializing test session:", err);
         setError(
-          typeof err?.message === "string"
-            ? err.message
-            : "An error occurred while starting the test"
+          err instanceof Error ? err.message : "An error occurred while starting the test"
         );
       } finally {
         setLoading(false);
@@ -177,6 +199,7 @@ export default function TestDetailPage() {
     setError(null);
 
     try {
+      // 1) Insert user answers (same as before)
       for (const q of questions) {
         await supabaseClient.from("user_answers").insert({
           session_id: sessionId,
@@ -187,8 +210,8 @@ export default function TestDetailPage() {
 
       let finalScore: number | null = null;
 
+      // 2) ADHD TEST
       if (testIds === "79dfb445-08d3-4251-987b-b2c1c7d3b520") {
-        // ADHD TEST
         let rawScore = 0;
         for (const q of questions) {
           const userAnswer = answers[q.id];
@@ -197,6 +220,7 @@ export default function TestDetailPage() {
           else if (userAnswer === "C") rawScore += 2;
           else if (userAnswer === "D") rawScore += 3;
         }
+
         const maxPossibleScore = questions.length * 3;
         const scorePercentage = rawScore / maxPossibleScore;
         const adhd_score = Math.round(scorePercentage * 20);
@@ -209,6 +233,7 @@ export default function TestDetailPage() {
 
         alert(`ADHD Test submitted! Your score: ${adhd_score}/20 (${likelihood})`);
 
+        // Update user_test_sessions with ADHD final score
         const { error: adhdUpdateError } = await supabaseClient
           .from("user_test_sessions")
           .update({
@@ -217,10 +242,13 @@ export default function TestDetailPage() {
             score: finalScore,
           })
           .eq("id", sessionId);
+
         if (adhdUpdateError) throw adhdUpdateError;
-      } else if (testIds === "00000000-0000-0000-0000-000000000001") {
-        // IQ TEST
-        const categoryTotals = {
+      }
+      // 3) IQ TEST
+      else if (testIds === "00000000-0000-0000-0000-000000000001") {
+        // 3A) Track sub-scores for each category
+        const categoryTotals: CategoryTotals = {
           numerical: { correct: 0, total: 0 },
           logical: { correct: 0, total: 0 },
           spatial: { correct: 0, total: 0 },
@@ -232,6 +260,7 @@ export default function TestDetailPage() {
           const isCorrect = userAnswer === q.correct_option;
           if (isCorrect) overallCorrectCount++;
 
+          // Only apply sub-score logic for IQ test questions
           if (q.category === "numerical") {
             categoryTotals.numerical.total += 1;
             if (isCorrect) categoryTotals.numerical.correct += 1;
@@ -245,9 +274,12 @@ export default function TestDetailPage() {
         }
 
         const total = questions.length;
-        const approximateIQ = Math.floor(100 + ((overallCorrectCount / total) * 100 - 50));
+        const approximateIQ = Math.floor(
+          100 + ((overallCorrectCount / total) * 100 - 50)
+        );
         finalScore = approximateIQ;
 
+        // 3B) Compute sub-scores
         function computeCategoryIQ({ correct, total }: { correct: number; total: number }) {
           if (total === 0) return 0;
           const fractionCorrect = correct / total;
@@ -265,6 +297,7 @@ export default function TestDetailPage() {
           `Spatial IQ: ${iqSpatial}`
         );
 
+        // 3C) Update user_test_sessions with the overall score + sub-scores
         const { error: iqUpdateError } = await supabaseClient
           .from("user_test_sessions")
           .update({
@@ -276,9 +309,11 @@ export default function TestDetailPage() {
             score_spatial: iqSpatial,
           })
           .eq("id", sessionId);
+
         if (iqUpdateError) throw iqUpdateError;
-      } else {
-        // Generic Test
+      }
+      // 4) Generic test handling
+      else {
         let correctCount = 0;
         for (const q of questions) {
           if (answers[q.id] === q.correct_option) correctCount++;
@@ -294,10 +329,13 @@ export default function TestDetailPage() {
             score: finalScore,
           })
           .eq("id", sessionId);
+
         if (genericUpdateError) throw genericUpdateError;
       }
 
+      // 5) Finally, redirect to /account
       router.replace("/account");
+
     } catch (err: any) {
       console.error("Error submitting test:", err);
       setError(

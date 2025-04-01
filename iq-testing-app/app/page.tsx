@@ -317,10 +317,7 @@ export default function Home() {
             <Link href="/privacy" style={{ color: "#fff", textDecoration: "none" }}>
               Privacy
             </Link>
-            <Link
-              href="/terms-and-conditions"
-              style={{ color: "#fff", textDecoration: "none" }}
-            >
+            <Link href="/terms-and-conditions" style={{ color: "#fff", textDecoration: "none" }}>
               Terms and conditions
             </Link>
             <Link href="/data-request" style={{ color: "#fff", textDecoration: "none" }}>

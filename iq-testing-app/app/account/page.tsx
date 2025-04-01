@@ -36,11 +36,8 @@ type UserProfile = {
 export default function AccountPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState<Session | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
   const [testSessions, setTestSessions] = useState<TestSession[]>([]);
-
-  // Store additional user details
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
@@ -58,7 +55,6 @@ export default function AccountPage() {
           return;
         }
 
-        setSession(session);
         setUserEmail(session.user.email || "");
 
         // 2) Fetch user profile (including new columns)

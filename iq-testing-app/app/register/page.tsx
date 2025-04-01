@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { supabaseClient } from "@/lib/supabaseClient";
 import Link from "next/link";
 
+type CustomError = {
+  message: string;
+};
+
 export default function RegisterPage() {
   const router = useRouter();
 
@@ -70,7 +74,7 @@ export default function RegisterPage() {
           setStep(2);
         }
       }
-    } catch (err: any) {
+    } catch (err: CustomError) {
       setErrorMsg(err.message || "An error occurred during registration");
     } finally {
       setLoading(false);
@@ -112,10 +116,8 @@ export default function RegisterPage() {
         // Redirect to login or home
         router.push("/login");
       }
-    } catch (err: any) {
-      setErrorMsg(
-        err.message || "An error occurred while updating profile details"
-      );
+    } catch (err: CustomError) {
+      setErrorMsg(err.message || "An error occurred while updating profile details");
     } finally {
       setLoading(false);
     }
